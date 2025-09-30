@@ -29,10 +29,6 @@ vim.o.undofile = true
 vim.cmd([[set noswapfile]])
 vim.o.confirm = true
 
--- Tabs & Indentation
-vim.o.tabstop = 2
-vim.o.shiftwidth = 2
-
 -- Timing
 vim.o.updatetime = 250
 vim.o.timeoutlen = 300
@@ -46,9 +42,6 @@ vim.opt.foldenable = true
 vim.opt.foldlevelstart = 99
 vim.opt.foldlevel = 99
 vim.opt.foldmethod = "indent"
-
--- Completion
-vim.opt.completeopt = { "menu", "menuone", "noselect", "popup", "preview" }
 
 -- Clipboard (scheduled to avoid startup issues)
 vim.schedule(function()
@@ -65,8 +58,6 @@ vim.g.maplocalleader = " "
 
 -- General
 vim.keymap.set("n", "<Esc>", "<cmd>nohlsearch<CR>")
-vim.keymap.set("n", "<leader>qq", ":q<CR>", { desc = "Quit" })
-vim.keymap.set("n", "<leader>w", ":write<CR>", { desc = "Write" })
 vim.keymap.set("n", "<C-s>", ":write<CR>", { desc = "Save" })
 vim.keymap.set("n", "<leader>so", ":update<CR> :source<CR>", { desc = "Source config" })
 vim.keymap.set("n", "<leader>bd", "<cmd>bdelete<CR>", { desc = "Delete buffer" })
@@ -99,7 +90,8 @@ vim.keymap.set("t", "<Esc><Esc>", "<C-\\><C-n>", { desc = "Exit terminal mode" }
 vim.keymap.set("n", "<leader>q", vim.diagnostic.setloclist, { desc = "Open diagnostic quickfix list" })
 vim.keymap.set("n", "<leader>lf", vim.lsp.buf.format, { desc = "Format buffer" })
 vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action, { desc = "Code action" })
-vim.keymap.set("n", "<leader>gd", vim.lsp.buf.declaration, { desc = "Go to declaration" })
+vim.keymap.set("n", "gD", vim.lsp.buf.type_definition, { desc = "Go to declaration" })
+vim.keymap.set("n", "gd", vim.lsp.buf.definition, { desc = "Go to declaration" })
 vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename, { desc = "Rename symbol" })
 
 -- Plugin keymaps
@@ -138,18 +130,20 @@ vim.pack.add({
 	"https://github.com/stevearc/conform.nvim",
 	"https://github.com/NMAC427/guess-indent.nvim",
 	"https://github.com/neovim/nvim-lspconfig",
-	"https://github.com/echasnovski/mini.pick",
 	"https://github.com/ibhagwan/fzf-lua",
 	"https://github.com/coffebar/neovim-project",
 	"https://github.com/Shatur/neovim-session-manager",
 	"https://github.com/nvim-lua/plenary.nvim",
 	"https://github.com/nvim-mini/mini.extra",
 	"https://github.com/nvim-mini/mini.icons",
+	"https://github.com/echasnovski/mini.pick",
 	"https://github.com/nvim-treesitter/nvim-treesitter",
-	"https://github.com/folke/tokyonight.nvim",
 	"https://github.com/tpope/vim-surround",
+	"https://github.com/tpope/vim-sensible",
 	"https://github.com/tpope/vim-repeat",
 	"https://github.com/NeogitOrg/neogit",
+	"https://github.com/saghen/blink.cmp",
+	"https://github.com/navarasu/onedark.nvim",
 })
 
 -- ============================================================================
@@ -254,52 +248,31 @@ require("gitsigns").setup({
 
 require("neogit")
 
-vim.cmd("colorscheme tokyonight")
+require("blink.cmp").setup({
+	completion = {
+		documentation = {
+			auto_show = true,
+		},
+	},
+	fuzzy = {
+		frecency = { enabled = true },
+		use_proximity = true,
+		implementation = "prefer_rust",
+		prebuilt_binaries = {
+			download = true,
+			force_version = "v1.7.0",
+		},
+	},
+})
 
+require("onedark").setup({})
+
+vim.cmd("colorscheme onedark")
 -- ============================================================================
 -- LSP CONFIGURATION
 -- ============================================================================
 
 vim.lsp.enable({ "lua_ls", "ts_ls", "tailwindcss", "eslint" })
-
-vim.api.nvim_create_autocmd("LspAttach", {
-	group = vim.api.nvim_create_augroup("my.lsp", {}),
-	callback = function(args)
-		local client = assert(vim.lsp.get_client_by_id(args.data.client_id))
-
-		-- without this the autosuggest will reset after typing one of the chars below
-		if client.name == "tailwindcss" then
-			vim.opt_local.iskeyword:append("-")
-			vim.opt_local.iskeyword:append(".") -- for arbitrary values like w-[50.5rem]
-			vim.opt_local.iskeyword:append("/") -- for opacity like bg-black/50
-			vim.opt_local.iskeyword:append("[") -- for arbitrary values like w-[100px]
-			vim.opt_local.iskeyword:append("]")
-		end
-
-		-- Completion setup
-		if client:supports_method("textDocument/completion") then
-			if client.server_capabilities.completionProvider then
-				client.server_capabilities.completionProvider.resolveProvider = true
-			end
-
-			-- Trigger autocompletion on every keypress
-			local chars = {}
-			for i = 32, 126 do
-				table.insert(chars, string.char(i))
-			end
-			client.server_capabilities.completionProvider.triggerCharacters = chars
-			vim.lsp.completion.enable(true, client.id, args.buf, { autotrigger = true })
-		end
-
-		-- Completion accept
-		vim.keymap.set("i", "<C-y>", function()
-			if vim.fn.pumvisible() == 1 then
-				return "<C-y>"
-			end
-			return "<C-y>"
-		end, { expr = true, buffer = args.buf })
-	end,
-})
 
 -- ============================================================================
 -- TERMINAL MANAGEMENT
