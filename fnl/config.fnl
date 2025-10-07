@@ -97,7 +97,10 @@
 ;; Terminal tabs
 (set-keymap :n "<leader>td" ":tabclose<CR>" {:desc "Close terminal tab"})
 
-(vim.pack.add [
+;; ============================================================================
+;; PLUGIN BOOTSTRAP
+;; ============================================================================
+(local plugins [
 		"https://github.com/rktjmp/hotpot.nvim"
 		"https://github.com/supermaven-inc/supermaven-nvim"
 		"https://github.com/lewis6991/gitsigns.nvim"
@@ -116,6 +119,19 @@
 		"https://github.com/mistweaverco/kulala.nvim"
 		"https://github.com/twenty9-labs/frisch.nvim"
 		"https://github.com/Olical/conjure"])
+
+(local pack-path (.. (vim.fn.stdpath :data) "/pack/plugins/start"))
+(vim.fn.mkdir pack-path :p)
+
+;; Bootstrap: install missing plugins
+(each [_ url (ipairs plugins)]
+  (local name (url:match "([^/]+)$"))
+  (local plugin-dir (.. pack-path "/" name))
+  (when (= (vim.fn.isdirectory plugin-dir) 0)
+    (print (.. "Installing " name "..."))
+    (vim.fn.system ["git" "clone" "--depth" "1" url plugin-dir])))
+
+(vim.pack.add plugins)
 
 ;; ============================================================================
 ;; PLUGIN CONFIGURATION
