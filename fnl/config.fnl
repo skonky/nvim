@@ -30,6 +30,12 @@
 
 (set-globals {
 	     :neovide_theme "auto"
+	     :neovide_padding_left 50
+	     :neovide_padding_right 50
+	     :neovide_opacity 0.85
+	     :neovide_window_blurred true
+	     :neovide_padding_top 50
+	     :neovide_padding_bottom 50
 	     :mapleader " "
 	     :maplocalleader " "})
 
@@ -100,16 +106,15 @@
 		"https://github.com/NMAC427/guess-indent.nvim"
 		"https://github.com/neovim/nvim-lspconfig"
 		"https://github.com/ibhagwan/fzf-lua"
-		"https://github.com/miikanissi/modus-themes.nvim"
 		"https://github.com/coffebar/neovim-project"
 		"https://github.com/Shatur/neovim-session-manager"
 		"https://github.com/nvim-lua/plenary.nvim"
 		"https://github.com/echasnovski/mini.nvim"
 		"https://github.com/nvim-treesitter/nvim-treesitter"
 		"https://github.com/NeogitOrg/neogit"
-		"https://gitlab.com/HiPhish/rainbow-delimiters.nvim"
 		"https://github.com/navarasu/onedark.nvim"
 		"https://github.com/mistweaverco/kulala.nvim"
+		"https://github.com/twenty9-labs/frisch.nvim"
 		"https://github.com/Olical/conjure"])
 
 ;; ============================================================================
@@ -203,8 +208,7 @@
 
 (require :neogit)
 
-((. (require :modus-themes) :setup))
-(vim.cmd "colorscheme modus")
+(vim.cmd "colorscheme nord")
 
 ;; ============================================================================
 ;; LSP CONFIGURATION
