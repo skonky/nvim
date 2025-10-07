@@ -1,6 +1,7 @@
 (local vim _G.vim)
 (local {: set-opts : set-globals : set-keymap} (require :utils))
 
+
 (set-opts {
 	  :termguicolors true
 	  :number true
@@ -60,6 +61,7 @@
 (set-keymap :v "<" "<gv" {:desc "Indent left and reselect"})
 (set-keymap :v ">" ">gv" {:desc "Indent right and reselect"})
 
+
 ;; Better J behavior
 (set-keymap :n "J" "mzJ`z" {:desc "Join lines and keep cursor position"})
 
@@ -89,7 +91,7 @@
 ;; Terminal tabs
 (set-keymap :n "<leader>td" ":tabclose<CR>" {:desc "Close terminal tab"})
 
-(local plugins [
+(vim.pack.add [
 		"https://github.com/rktjmp/hotpot.nvim"
 		"https://github.com/supermaven-inc/supermaven-nvim"
 		"https://github.com/lewis6991/gitsigns.nvim"
@@ -109,10 +111,6 @@
 		"https://github.com/navarasu/onedark.nvim"
 		"https://github.com/mistweaverco/kulala.nvim"
 		"https://github.com/Olical/conjure"])
-
-
-(each [_ plugin (ipairs plugins)]
-  (vim.pack.add [plugin]))
 
 ;; ============================================================================
 ;; PLUGIN CONFIGURATION
@@ -158,11 +156,11 @@
 ((. (require :conform) :setup)
  {:format_on_save {:timeout_ms 500
                    :lsp_format :fallback}
-  :formatters_by_ft {:lua [:stylua :lsp_format :lua_ls]
-                     :javascript [:prettierd ]
-                     :typescript [:prettierd ]
-                     :typescriptreact [:prettierd ]
-                     :json [:prettierd ]}})
+  :formatters_by_ft {:lua [:stylua]
+                     :javascript [:prettierd]
+                     :typescript [:prettierd]
+                     :typescriptreact [:prettierd]
+                     :json [:prettierd]}})
 ((. (require :oil) :setup)
  {:columns [:icon]})
 
@@ -272,6 +270,9 @@
   (set title (.. title "%#TabLineFill#%T"))
   title)
 
+;; Need this for kulala to have lsp and syntax highlighting
 (vim.filetype.add {:extension {:http "http"}})
 
-
+;; Prevent write issues with typescript-language-server
+(set vim.env.TMPDIR (vim.fn.expand "~/.cache/nvim/tmp"))
+(vim.fn.mkdir vim.env.TMPDIR :p)
