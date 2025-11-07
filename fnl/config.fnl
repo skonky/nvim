@@ -109,7 +109,6 @@
 
 (vim.pack.add [
 		"https://github.com/rktjmp/hotpot.nvim"
-		"https://github.com/supermaven-inc/supermaven-nvim"
 		"https://github.com/lewis6991/gitsigns.nvim"
 		"https://github.com/stevearc/oil.nvim"
 		"https://github.com/stevearc/conform.nvim"
@@ -144,7 +143,6 @@
                                                (fn [] ((. (require :kulala) :replay)))
                                                {:ft [:http :rest]}]
                    "Find request" false}})
-((. (require :supermaven-nvim) :setup) {})
 ((. (require :mini.icons) :setup))
 ((. (require :mini.comment) :setup))
 ((. (require :mini.surround) :setup))
