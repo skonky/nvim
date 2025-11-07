@@ -4,8 +4,8 @@
 
 (set-opts {
 	  :termguicolors true
-	  :number true
-	  :relativenumber true
+	  :number false
+	  :relativenumber false
 	  :signcolumn "yes"
 	  :cursorline true
 	  :scrolloff 10
@@ -48,6 +48,16 @@
 (set-keymap :n "<C-s>" ":write<CR>" {:desc "Save"})
 (set-keymap :n "<leader>so" ":update<CR> :source<CR>" {:desc "Source config"})
 (set-keymap :n "<leader>bd" "<cmd>bdelete<CR>" {:desc "Delete buffer"})
+(set-keymap :n :<leader>n 
+  (fn []
+    (if (or (vim.opt.number:get) (vim.opt.relativenumber:get))
+      (do
+        (set vim.opt.number false)
+        (set vim.opt.relativenumber false))
+      (do
+        (set vim.opt.number true)
+        (set vim.opt.relativenumber true))))
+  {:desc "Toggle line numbers"})
 
 ;; Navigation
 (set-keymap :n "<C-d>" "<C-d>zz" {:desc "Scroll down and center"})
@@ -139,13 +149,13 @@
 ((. (require :mini.comment) :setup))
 ((. (require :mini.surround) :setup))
 ((. (require :mini.pairs) :setup))
-((. (require :mini.pick) :setup) 
- {:mappings {:choose_all {:char "<C-q>"
-                          :func (fn []
-                                  (local miniPick (require :mini.pick))
-                                  (local mappings (. (miniPick.get_picker_opts) :mappings))
-                                  (vim.api.nvim_input (.. mappings.mark_all 
-                                                          mappings.choose_marked)))}}
+((. (require :mini.pick) :setup)
+ {:mappings {:send_to_qflist {:char "<C-q>"
+                               :func (fn []
+                                       (local MiniPick (require :mini.pick))
+                                       (local matches (MiniPick.get_picker_matches))
+                                       (MiniPick.default_choose_marked matches.all)
+                                       (MiniPick.stop))}}
   :window {:config (fn []
                      (local height (math.floor (* vim.o.lines 0.9)))
                      (local width (math.floor (* vim.o.columns 0.9)))
@@ -280,3 +290,8 @@
 ;; Prevent write issues with typescript-language-server
 (set vim.env.TMPDIR (vim.fn.expand "~/.cache/nvim/tmp"))
 (vim.fn.mkdir vim.env.TMPDIR :p)
+
+(vim.api.nvim_create_autocmd :ColorScheme
+  {:pattern "*"
+   :callback (fn []
+               (vim.cmd "hi StatusLine guibg=NONE ctermbg=NONE"))})
