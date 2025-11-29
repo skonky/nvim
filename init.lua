@@ -1,3 +1,4 @@
+local vim = vim
 local utils = require("utils")
 local set_opts = utils.set_opts
 local set_globals = utils.set_globals
@@ -139,6 +140,10 @@ set_keymap("n", "<leader>gs", ":Pick git_hunks<CR>", { desc = "Git hunks" })
 set_keymap("n", "<leader>km", ":Pick keymaps<CR>", { desc = "Keymaps" })
 set_keymap("n", "<D-x>", ":Pick commands<CR>", { desc = "Commands" })
 
+set_keymap("n", "<C-Up>", ":resize +2<CR>", { desc = "Increase height" })
+set_keymap("n", "<C-Down>", ":resize -2<CR>", { desc = "Decrease height" })
+set_keymap("n", "<C-Left>", ":vertical resize -2<CR>", { desc = "Decrease width" })
+set_keymap("n", "<C-Right>", ":vertical resize +2<CR>", { desc = "Increase width" })
 set_keymap("n", "<leader>sv", ":vsplit<CR>", { desc = "Split vertical" })
 set_keymap("n", "<leader>sh", ":split<CR>", { desc = "Split horizontal" })
 set_keymap("n", "<leader>td", ":tabclose<CR>", { desc = "Close tab" })
