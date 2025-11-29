@@ -269,8 +269,6 @@ require("nvim-treesitter.configs").setup({
 		"json",
 		"css",
 		"html",
-		"fennel",
-		"clojure",
 	},
 })
 
@@ -316,7 +314,7 @@ require("kulala").setup({
 -- LSP
 -- ============================================================================
 
-vim.lsp.enable({ "lua_ls", "ts_ls", "tailwindcss", "eslint", "fennel_language_server" })
+vim.lsp.enable({ "lua_ls", "ts_ls", "tailwindcss", "eslint" })
 
 -- ============================================================================
 -- FILETYPE & COLORSCHEME
