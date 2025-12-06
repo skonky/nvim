@@ -169,7 +169,6 @@ set_keymap("t", "<Esc><Esc>", "<C-\\><C-n>", { desc = "Exit terminal" })
 -- ============================================================================
 
 vim.pack.add({
-	"https://github.com/rktjmp/hotpot.nvim",
 	"https://github.com/lewis6991/gitsigns.nvim",
 	"https://github.com/stevearc/oil.nvim",
 	"https://github.com/stevearc/conform.nvim",
