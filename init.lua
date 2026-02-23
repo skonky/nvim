@@ -5,31 +5,17 @@ local set_globals = utils.set_globals
 local set_keymap = utils.set_keymap
 
 -- ============================================================================
--- AUTOCOMMANDS
+-- GLOBALS & OPTIONS
 -- ============================================================================
 
-local augroup = vim.api.nvim_create_augroup("UserConfig", {})
-
-vim.api.nvim_create_autocmd("TextYankPost", {
-	group = augroup,
-	callback = function()
-		vim.highlight.on_yank()
-	end,
+set_globals({
+	mapleader = " ",
+	maplocalleader = " ",
+	neovide_padding_left = 20,
+	neovide_padding_right = 20,
+	neovide_padding_top = 20,
+	neovide_padding_bottom = 20,
 })
-
-vim.api.nvim_create_autocmd("BufWritePre", {
-	group = augroup,
-	callback = function()
-		local dir = vim.fn.expand("<afile>:p:h")
-		if vim.fn.isdirectory(dir) == 0 then
-			vim.fn.mkdir(dir, "p")
-		end
-	end,
-})
-
--- ============================================================================
--- OPTIONS
--- ============================================================================
 
 set_opts({
 	termguicolors = true,
@@ -40,7 +26,6 @@ set_opts({
 	scrolloff = 10,
 	splitright = true,
 	splitbelow = true,
-	hlsearch = false,
 	ignorecase = true,
 	smartcase = true,
 	inccommand = "split",
@@ -59,22 +44,33 @@ set_opts({
 	foldmethod = "indent",
 	wildmenu = true,
 	wildmode = "longest:full,full",
-})
-
-set_globals({
-	mapleader = " ",
-	maplocalleader = " ",
-	neovide_theme = "auto",
-	neovide_padding_left = 50,
-	neovide_padding_right = 50,
-	neovide_padding_top = 50,
-	neovide_padding_bottom = 50,
-	adwaita_darker = true,
+	tabstop = 2,
+	shiftwidth = 2,
+	expandtab = false,
 })
 
 vim.schedule(function()
 	vim.opt.clipboard:append("unnamedplus")
 end)
+
+vim.filetype.add({ extension = { http = "http" } })
+
+-- ts_ls writes to /tmp which can cause issues on some systems
+vim.env.TMPDIR = vim.fn.expand("~/.cache/nvim/tmp")
+vim.fn.mkdir(vim.env.TMPDIR, "p")
+
+-- ============================================================================
+-- AUTOCOMMAND
+-- ============================================================================
+
+local augroup = vim.api.nvim_create_augroup("UserConfig", {})
+
+vim.api.nvim_create_autocmd("TextYankPost", {
+	group = augroup,
+	callback = function()
+		vim.highlight.on_yank()
+	end,
+})
 
 -- ============================================================================
 -- KEYMAPS: EDITING
@@ -106,12 +102,41 @@ set_keymap("n", "<C-l>", "<C-w><C-l>", { desc = "Window right" })
 set_keymap("n", "<C-j>", "<C-w><C-j>", { desc = "Window down" })
 set_keymap("n", "<C-k>", "<C-w><C-k>", { desc = "Window up" })
 
+set_keymap("n", "-", ":foldclose<CR>", { desc = "Close fold" })
+set_keymap("n", "+", ":foldopen<CR>", { desc = "Open fold" })
+
+set_keymap("n", "s", function()
+	require("flash").jump()
+end, { desc = "Flash jump" })
+
+set_keymap("n", "gx", function()
+	local url = string.match(vim.fn.expand("<cWORD>"), "https?://[%w-_%.%?%.:/%+=&]+[^ >\"',;`]*")
+	if url then
+		vim.ui.open(url)
+	end
+end)
+
+-- ============================================================================
+-- KEYMAPS: WINDOWS, BUFFERS & TABS
+-- ============================================================================
+
+set_keymap("n", "<C-Up>", ":resize +2<CR>", { desc = "Increase height" })
+set_keymap("n", "<C-Down>", ":resize -2<CR>", { desc = "Decrease height" })
+set_keymap("n", "<C-Left>", ":vertical resize -2<CR>", { desc = "Decrease width" })
+set_keymap("n", "<C-Right>", ":vertical resize +2<CR>", { desc = "Increase width" })
+set_keymap("n", "<leader>sv", ":vsplit<CR>", { desc = "Split vertical" })
+set_keymap("n", "<leader>sh", ":split<CR>", { desc = "Split horizontal" })
+
+set_keymap("n", "<leader>td", ":tabclose<CR>", { desc = "Close tab" })
+set_keymap("n", "<leader>tn", ":tabnew<CR>", { desc = "New tab" })
+set_keymap("n", "<leader>tk", ":tabnext<CR>", { desc = "Next tab" })
+set_keymap("n", "<leader>tj", ":tabprevious<CR>", { desc = "Prev tab" })
+
+set_keymap("t", "<Esc><Esc>", "<C-\\><C-n>", { desc = "Exit terminal" })
+
 set_keymap("n", "<leader>bn", ":bnext<CR>", { desc = "Next buffer" })
 set_keymap("n", "<leader>bp", ":bprevious<CR>", { desc = "Prev buffer" })
 set_keymap("n", "<leader>bd", "<cmd>bdelete<CR>", { desc = "Delete buffer" })
-
-set_keymap("n", "-", ":foldclose<CR>", { desc = "Close fold" })
-set_keymap("n", "+", ":foldopen<CR>", { desc = "Open fold" })
 
 -- ============================================================================
 -- KEYMAPS: LSP
@@ -132,21 +157,11 @@ set_keymap("n", "<leader>e", ":Oil<CR>", { desc = "File explorer" })
 set_keymap("n", "<leader>gg", ":Neogit<CR>", { desc = "Neogit" })
 set_keymap("n", "<leader>pp", "<cmd>NeovimProjectDiscover<CR>", { desc = "Projects" })
 
-set_keymap("n", "<leader>sf", ":Pick files<CR>", { desc = "Find files" })
-set_keymap("n", "<leader>sg", ":Pick grep_live<CR>", { desc = "Live grep" })
-set_keymap("n", "<leader>/", ":Pick buf_lines<CR>", { desc = "Buffer lines" })
-set_keymap("n", "<leader><leader>", ":Pick buffers<CR>", { desc = "Buffers" })
+set_keymap("n", "<leader>sf", ":Pick files<CR>", { desc = "Search files" })
+set_keymap("n", "<leader>sg", ":Pick grep_live<CR>", { desc = "Search grep" })
+set_keymap("n", "<leader>/", ":Pick buf_lines<CR>", { desc = "Buffer search" })
+set_keymap("n", "<leader><leader>", ":Pick buffers<CR>", { desc = "Select buffer" })
 set_keymap("n", "<leader>gs", ":Pick git_hunks<CR>", { desc = "Git hunks" })
-set_keymap("n", "<leader>km", ":Pick keymaps<CR>", { desc = "Keymaps" })
-set_keymap("n", "<D-x>", ":Pick commands<CR>", { desc = "Commands" })
-
-set_keymap("n", "<C-Up>", ":resize +2<CR>", { desc = "Increase height" })
-set_keymap("n", "<C-Down>", ":resize -2<CR>", { desc = "Decrease height" })
-set_keymap("n", "<C-Left>", ":vertical resize -2<CR>", { desc = "Decrease width" })
-set_keymap("n", "<C-Right>", ":vertical resize +2<CR>", { desc = "Increase width" })
-set_keymap("n", "<leader>sv", ":vsplit<CR>", { desc = "Split vertical" })
-set_keymap("n", "<leader>sh", ":split<CR>", { desc = "Split horizontal" })
-set_keymap("n", "<leader>td", ":tabclose<CR>", { desc = "Close tab" })
 
 set_keymap("n", "<leader>n", function()
 	local enabled = vim.opt.number:get() or vim.opt.relativenumber:get()
@@ -162,14 +177,13 @@ end, { desc = "Copy file path" })
 
 set_keymap("n", "<leader>so", ":update<CR> :source<CR>", { desc = "Source config" })
 
-set_keymap("t", "<Esc><Esc>", "<C-\\><C-n>", { desc = "Exit terminal" })
-
 -- ============================================================================
 -- PLUGINS
 -- ============================================================================
 
 vim.pack.add({
-	"https://github.com/rktjmp/hotpot.nvim",
+	"https://github.com/folke/which-key.nvim",
+	"https://github.com/OXY2DEV/helpview.nvim",
 	"https://github.com/lewis6991/gitsigns.nvim",
 	"https://github.com/stevearc/oil.nvim",
 	"https://github.com/stevearc/conform.nvim",
@@ -184,11 +198,104 @@ vim.pack.add({
 	"https://github.com/NeogitOrg/neogit",
 	"https://github.com/mistweaverco/kulala.nvim",
 	"https://github.com/github/copilot.vim",
+	"https://github.com/MunifTanjim/nui.nvim",
+	"https://github.com/folke/noice.nvim",
+	"https://github.com/folke/tokyonight.nvim",
+	"https://github.com/twenty9-labs/neotone.nvim",
+	"https://github.com/nvim-lualine/lualine.nvim",
+	"https://github.com/b0o/incline.nvim",
+	"https://github.com/nvim-tree/nvim-web-devicons",
+	"https://github.com/folke/flash.nvim",
 })
 
 -- ============================================================================
 -- PLUGIN CONFIG
 -- ============================================================================
+
+require("which-key").setup({
+	preset = "helix",
+	delay = 200,
+	icons = {
+		mappings = true,
+		rules = {},
+	},
+	spec = {
+		{ "<leader>b", group = "Buffer", icon = "󰈔" },
+		{ "<leader>c", group = "Code", icon = "󰌗" },
+		{ "<leader>d", group = "Delete / Duplicate", icon = "󰆴" },
+		{ "<leader>g", group = "Git", icon = "󰊢" },
+		{ "<leader>l", group = "LSP", icon = "󰅩" },
+		{ "<leader>p", group = "Project / Path", icon = "󰉋" },
+		{ "<leader>r", group = "Rename", icon = "󰑕" },
+		{ "<leader>R", group = "HTTP requests", icon = "󰌗" },
+		{ "<leader>s", group = "Search / Split", icon = "󰢶" },
+		{ "<leader>t", group = "Tabs", icon = "󰓫" },
+	},
+})
+
+local helpers = require("incline.helpers")
+local devicons = require("nvim-web-devicons")
+require("incline").setup({
+	window = {
+		padding = 0,
+	},
+	render = function(props)
+		local bufname = vim.api.nvim_buf_get_name(props.buf)
+		if bufname == "" then
+			return { " ", "[No Name]", " " }
+		end
+
+		local filename = vim.fn.fnamemodify(bufname, ":t")
+		local ft_icon, ft_color = devicons.get_icon_color(filename)
+		local modified = vim.bo[props.buf].modified
+
+		local path = vim.fn.fnamemodify(bufname, ":~:.:h")
+		local parts = {}
+		if path ~= "." then
+			for part in path:gmatch("[^/]+") do
+				table.insert(parts, part)
+			end
+			for i = 1, #parts - 1 do
+				parts[i] = parts[i]:sub(1, 1)
+			end
+		end
+
+		local dir = #parts > 0 and (table.concat(parts, "/") .. "/") or ""
+
+		return {
+			ft_icon and { " ", ft_icon, " ", guibg = ft_color, guifg = helpers.contrast_color(ft_color) } or "",
+			" ",
+			#dir > 0 and { dir, group = "Comment" } or "",
+			{ filename, gui = modified and "bold,italic" or "bold" },
+			" ",
+			group = "Visual",
+		}
+	end,
+})
+
+require("lualine").setup({
+	options = {
+		icons_enabled = true,
+		section_separators = { left = "", right = "" },
+		component_separators = { left = "|", right = "|" },
+	},
+	sections = {
+		lualine_a = { "mode" },
+		lualine_b = { "branch" },
+		lualine_c = { "" },
+		lualine_x = { "" },
+		lualine_y = { "diff", "diagnostics" },
+		lualine_z = { "" },
+	},
+	inactive_sections = {
+		lualine_a = {},
+		lualine_b = {},
+		lualine_c = { "" },
+		lualine_x = { "location" },
+		lualine_y = {},
+		lualine_z = {},
+	},
+})
 
 require("mini.icons").setup()
 require("mini.comment").setup()
@@ -221,6 +328,14 @@ require("mini.pick").setup({
 				col = math.floor((vim.o.columns - width) / 2),
 			}
 		end,
+	},
+})
+
+require("neotone").setup({
+	mode = "system",
+	themes = {
+		dark = "tokyonight-night",
+		light = "tokyonight-day",
 	},
 })
 
@@ -257,6 +372,8 @@ require("neovim-project").setup({
 		"~/Code/adhese/gambit-design-system.git",
 		"~/Code/adhese/sdk_typescript",
 		"~/Code/adhese/playwright-tests",
+		"~/Code/ahold/gambit-mcb",
+		"~/Code/monorepos/nest-stack",
 	},
 	picker = { type = "fzf-lua" },
 })
@@ -274,6 +391,7 @@ require("nvim-treesitter.configs").setup({
 		"json",
 		"css",
 		"html",
+		"vimdoc",
 	},
 })
 
@@ -315,19 +433,39 @@ require("kulala").setup({
 	},
 })
 
+require("noice").setup({
+	cmdline = {
+		enabled = true,
+	},
+	messages = {
+		enabled = true,
+	},
+	popupmenu = {
+		enabled = false,
+	},
+	notify = {
+		enabled = false,
+	},
+	lsp = {
+		progress = {
+			enabled = false,
+		},
+		hover = {
+			enabled = false,
+		},
+		signature = {
+			enabled = false,
+		},
+		message = {
+			enabled = false,
+		},
+	},
+})
+
+require("scratch-hover")
+
 -- ============================================================================
 -- LSP
 -- ============================================================================
 
-vim.lsp.enable({ "lua_ls", "ts_ls", "tailwindcss", "eslint" })
-
--- ============================================================================
--- FILETYPE & COLORSCHEME
--- ============================================================================
-
-vim.filetype.add({ extension = { http = "http" } })
-vim.cmd("colorscheme habamax")
-
--- ts_ls writes to /tmp which can cause issues on some systems
-vim.env.TMPDIR = vim.fn.expand("~/.cache/nvim/tmp")
-vim.fn.mkdir(vim.env.TMPDIR, "p")
+vim.lsp.enable({ "lua_ls", "ts_ls", "tailwindcss", "eslint", "jsonls", "html", "cssls" })
