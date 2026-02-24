@@ -1,4 +1,3 @@
-local vim = vim
 local utils = require("utils")
 local set_opts = utils.set_opts
 local set_globals = utils.set_globals
@@ -41,12 +40,14 @@ set_opts({
 	foldenable = true,
 	foldlevelstart = 99,
 	foldlevel = 99,
-	foldmethod = "indent",
+	foldmethod = "expr",
+	foldexpr = "v:lua.vim.treesitter.foldexpr()",
 	wildmenu = true,
 	wildmode = "longest:full,full",
 	tabstop = 2,
 	shiftwidth = 2,
 	expandtab = false,
+	laststatus = 3,
 })
 
 vim.schedule(function()
@@ -78,7 +79,6 @@ vim.api.nvim_create_autocmd("TextYankPost", {
 
 set_keymap("n", "<Esc>", "<cmd>nohlsearch<CR>")
 set_keymap("n", "<C-s>", ":write<CR>", { desc = "Save" })
-set_keymap("n", "Y", "y$", { desc = "Yank to end of line" })
 set_keymap("n", "J", "mzJ`z", { desc = "Join lines (keep cursor)" })
 set_keymap("x", "<leader>p", '"_dP', { desc = "Paste without yanking" })
 set_keymap({ "n", "v" }, "<leader>d", '"_d', { desc = "Delete without yanking" })
@@ -146,6 +146,7 @@ set_keymap("n", "gd", vim.lsp.buf.definition, { desc = "Go to definition" })
 set_keymap("n", "gD", vim.lsp.buf.type_definition, { desc = "Go to type definition" })
 set_keymap("n", "<leader>rn", vim.lsp.buf.rename, { desc = "Rename symbol" })
 set_keymap("n", "<leader>ca", vim.lsp.buf.code_action, { desc = "Code action" })
+set_keymap("n", "gr", vim.lsp.buf.references, { desc = "References" })
 set_keymap("n", "<leader>lf", vim.lsp.buf.format, { desc = "Format buffer" })
 set_keymap("n", "<leader>q", vim.diagnostic.setloclist, { desc = "Diagnostic list" })
 
@@ -163,8 +164,38 @@ set_keymap("n", "<leader>/", ":Pick buf_lines<CR>", { desc = "Buffer search" })
 set_keymap("n", "<leader><leader>", ":Pick buffers<CR>", { desc = "Select buffer" })
 set_keymap("n", "<leader>gs", ":Pick git_hunks<CR>", { desc = "Git hunks" })
 
+local MiniPick = require("mini.pick")
+local pick_commands = function()
+	local cmds = vim.tbl_deep_extend("force", vim.api.nvim_get_commands({}), vim.api.nvim_buf_get_commands(0, {}))
+	local items = {}
+	for _, name in ipairs(vim.fn.getcompletion("", "command")) do
+		if name:match("^%a") then
+			local desc = cmds[name] and cmds[name].definition or ""
+			if desc:match("^<Lua") then
+				desc = ""
+			end
+			local display = desc ~= "" and string.format("%-30s %s", name, desc) or name
+			table.insert(items, display)
+		end
+	end
+	MiniPick.start({
+		source = {
+			name = "Commands",
+			items = items,
+			choose = function(item)
+				local cmd = item:match("^(%S+)")
+				vim.schedule(function()
+					vim.cmd(cmd)
+				end)
+			end,
+		},
+	})
+end
+set_keymap("n", "<M-d>", pick_commands, { desc = "Commands" })
+set_keymap("n", "H", "<cmd>Pick help<CR>", { desc = "Help" })
+
 set_keymap("n", "<leader>n", function()
-	local enabled = vim.opt.number:get() or vim.opt.relativenumber:get()
+	local enabled = vim.o.number or vim.o.relativenumber
 	vim.opt.number = not enabled
 	vim.opt.relativenumber = not enabled
 end, { desc = "Toggle line numbers" })
@@ -172,7 +203,7 @@ end, { desc = "Toggle line numbers" })
 set_keymap("n", "<leader>pa", function()
 	local path = vim.fn.expand("%:p")
 	vim.fn.setreg("+", path)
-	print("file:", path)
+	vim.notify("file: " .. path)
 end, { desc = "Copy file path" })
 
 set_keymap("n", "<leader>so", ":update<CR> :source<CR>", { desc = "Source config" })
@@ -184,6 +215,7 @@ set_keymap("n", "<leader>so", ":update<CR> :source<CR>", { desc = "Source config
 vim.pack.add({
 	"https://github.com/folke/which-key.nvim",
 	"https://github.com/OXY2DEV/helpview.nvim",
+	"https://github.com/OXY2DEV/markview.nvim",
 	"https://github.com/lewis6991/gitsigns.nvim",
 	"https://github.com/stevearc/oil.nvim",
 	"https://github.com/stevearc/conform.nvim",
@@ -385,6 +417,7 @@ require("nvim-treesitter.configs").setup({
 		"markdown",
 		"markdown_inline",
 		"typescript",
+		"tsx",
 		"javascript",
 		"graphql",
 		"yaml",
@@ -462,10 +495,16 @@ require("noice").setup({
 	},
 })
 
-require("scratch-hover")
+require("glimpse")
 
 -- ============================================================================
 -- LSP
 -- ============================================================================
+
+vim.diagnostic.config({
+	virtual_text = { spacing = 2, prefix = "●" },
+	signs = true,
+	underline = true,
+})
 
 vim.lsp.enable({ "lua_ls", "ts_ls", "tailwindcss", "eslint", "jsonls", "html", "cssls" })
