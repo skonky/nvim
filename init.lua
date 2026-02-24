@@ -164,7 +164,6 @@ set_keymap("n", "<leader>/", ":Pick buf_lines<CR>", { desc = "Buffer search" })
 set_keymap("n", "<leader><leader>", ":Pick buffers<CR>", { desc = "Select buffer" })
 set_keymap("n", "<leader>gs", ":Pick git_hunks<CR>", { desc = "Git hunks" })
 
-local MiniPick = require("mini.pick")
 local pick_commands = function()
 	local cmds = vim.tbl_deep_extend("force", vim.api.nvim_get_commands({}), vim.api.nvim_buf_get_commands(0, {}))
 	local items = {}
@@ -178,7 +177,7 @@ local pick_commands = function()
 			table.insert(items, display)
 		end
 	end
-	MiniPick.start({
+	require("mini.pick").start({
 		source = {
 			name = "Commands",
 			items = items,
