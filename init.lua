@@ -126,6 +126,7 @@ set_keymap("n", "<C-Left>", ":vertical resize -2<CR>", { desc = "Decrease width"
 set_keymap("n", "<C-Right>", ":vertical resize +2<CR>", { desc = "Increase width" })
 set_keymap("n", "<leader>sv", ":vsplit<CR>", { desc = "Split vertical" })
 set_keymap("n", "<leader>sh", ":split<CR>", { desc = "Split horizontal" })
+set_keymap("n", "<leader>cw", ":close<CR>", { desc = "Close split" })
 
 set_keymap("n", "<leader>td", ":tabclose<CR>", { desc = "Close tab" })
 set_keymap("n", "<leader>tn", ":tabnew<CR>", { desc = "New tab" })
@@ -191,6 +192,7 @@ local pick_commands = function()
 	})
 end
 set_keymap("n", "<M-d>", pick_commands, { desc = "Commands" })
+set_keymap("n", "<M-p>", "<cmd>NeovimProjectDiscover<CR>", { desc = "Projects" })
 set_keymap("n", "H", "<cmd>Pick help<CR>", { desc = "Help" })
 
 set_keymap("n", "<leader>n", function()
