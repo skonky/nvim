@@ -42,7 +42,6 @@ vim.keymap.set("n", "K", function()
 			vim.wo[win].linebreak = true
 			vim.wo[win].conceallevel = 3
 			vim.wo[win].concealcursor = "nvic"
-
 			vim.keymap.set("n", "q", "<cmd>close<cr>", { buffer = buf, silent = true })
 
 			vim.api.nvim_create_autocmd("BufLeave", {
