@@ -212,6 +212,8 @@ set_keymap("n", "<leader>so", ":update<CR> :source<CR>", { desc = "Source config
 -- ============================================================================
 
 vim.pack.add({
+	"https://github.com/nvim-treesitter/nvim-treesitter",
+	"https://github.com/rcarriga/nvim-notify",
 	"https://github.com/folke/which-key.nvim",
 	"https://github.com/OXY2DEV/helpview.nvim",
 	"https://github.com/OXY2DEV/markview.nvim",
@@ -225,7 +227,6 @@ vim.pack.add({
 	"https://github.com/Shatur/neovim-session-manager",
 	"https://github.com/nvim-lua/plenary.nvim",
 	"https://github.com/echasnovski/mini.nvim",
-	"https://github.com/nvim-treesitter/nvim-treesitter",
 	"https://github.com/NeogitOrg/neogit",
 	"https://github.com/mistweaverco/kulala.nvim",
 	"https://github.com/github/copilot.vim",
@@ -363,7 +364,7 @@ require("mini.pick").setup({
 })
 
 require("neotone").setup({
-	mode = "system",
+	mode = "dark",
 	themes = {
 		dark = "tokyonight-night",
 		light = "tokyonight-day",
@@ -392,39 +393,39 @@ require("guess-indent").setup({
 	auto_cmd = true,
 })
 
+local local_config = require("local")
 require("neovim-project").setup({
-	projects = {
-		"~/.config",
-		"~/.config/nvim",
-		"~/.config/kitty/",
-		"~/scripts/kulala",
-		"~/Code/adhese/cloud",
-		"~/Code/adhese/mcb-frontend.git",
-		"~/Code/adhese/gambit-design-system.git",
-		"~/Code/adhese/sdk_typescript",
-		"~/Code/adhese/playwright-tests",
-		"~/Code/ahold/gambit-mcb",
-		"~/Code/monorepos/nest-stack",
-	},
+	projects = local_config.projects,
 	picker = { type = "fzf-lua" },
 })
 
-require("nvim-treesitter.configs").setup({
-	highlight = { enable = true },
-	ensure_installed = {
-		"lua",
-		"markdown",
-		"markdown_inline",
-		"typescript",
-		"tsx",
-		"javascript",
-		"graphql",
-		"yaml",
-		"json",
-		"css",
-		"html",
-		"vimdoc",
-	},
+require("nvim-treesitter").setup()
+
+local parsers = {
+	"lua",
+	"markdown",
+	"markdown_inline",
+	"typescript",
+	"javascript",
+	"graphql",
+	"yaml",
+	"json",
+	"css",
+	"html",
+	"regex",
+	"bash",
+}
+
+-- Install parsers (replaces ensure_installed)
+require("nvim-treesitter").install(parsers, { summary = false, highlight = true }):wait(30000)
+
+vim.api.nvim_create_autocmd("FileType", {
+	group = augroup,
+	pattern = parsers,
+	callback = function(args)
+		vim.treesitter.start(args.buf)
+		vim.bo[args.buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+	end,
 })
 
 require("gitsigns").setup({
@@ -495,6 +496,7 @@ require("noice").setup({
 })
 
 require("glimpse")
+require("notes")
 
 -- ============================================================================
 -- LSP
