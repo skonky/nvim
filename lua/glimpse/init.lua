@@ -1,4 +1,4 @@
-vim.keymap.set("n", "K", function()
+local function hover()
 	local clients = vim.lsp.get_clients({ bufnr = 0 })
 	local encoding = clients[1] and clients[1].offset_encoding or "utf-16"
 	local params = vim.lsp.util.make_position_params(0, encoding)
@@ -55,4 +55,13 @@ vim.keymap.set("n", "K", function()
 			})
 		end)
 	end)
-end)
+end
+
+vim.api.nvim_create_autocmd("LspAttach", {
+	callback = function(args)
+		local client = vim.lsp.get_client_by_id(args.data.client_id)
+		if client and client:supports_method("textDocument/hover") then
+			vim.keymap.set("n", "K", hover, { buffer = args.buf })
+		end
+	end,
+})
