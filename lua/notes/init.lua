@@ -41,3 +41,27 @@ vim.keymap.set("n", "<leader>nn", function()
 		end
 	end)
 end, { desc = "New note" })
+
+vim.keymap.set("n", "<leader>sg", function()
+	require("mini.pick").builtin.grep_live(nil, {
+		source = {
+			cwd = notes_dir,
+			choose = function(item)
+				-- rg is run with a NUL field separator: "path\0lnum\0col\0text".
+				local parts = vim.split(item, "\0", { plain = true })
+				local rel, lnum = parts[1], tonumber(parts[2])
+				if not rel or rel == "" then
+					return
+				end
+				vim.schedule(function()
+					open_in_float(notes_dir .. "/" .. rel)
+					if lnum then
+						local last = vim.api.nvim_buf_line_count(0)
+						vim.api.nvim_win_set_cursor(0, { math.min(lnum, last), 0 })
+						vim.cmd("normal! zz")
+					end
+				end)
+			end,
+		},
+	})
+end, { desc = "Grep notes" })
