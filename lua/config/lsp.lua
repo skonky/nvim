@@ -1,0 +1,10 @@
+-- [nfnl] fnl/config/lsp.fnl
+vim.pack.add({"https://github.com/neovim/nvim-lspconfig"})
+vim.lsp.config("fennel_language_server", {cmd = {"fennel-language-server"}, filetypes = {"fennel"}, root_markers = {".nfnl.fnl", ".git"}, settings = {fennel = {workspace = {library = vim.api.nvim_list_runtime_paths()}, diagnostics = {globals = {"vim"}}}}})
+vim.lsp.enable("fennel_language_server")
+vim.lsp.config("typescript", {cmd = {"vtsls", "--stdio"}, filetypes = {"typescript", "typescriptreact"}})
+vim.lsp.enable("typescript")
+vim.lsp.config("tailwindcss", {cmd = {"tailwindcss-language-server"}, filetypes = {"typescriptreact"}})
+vim.lsp.enable("tailwindcss")
+vim.lsp.config("graphql", {filetypes = {"graphql"}})
+return vim.lsp.enable("graphql")
