@@ -26,8 +26,8 @@
   (vim.keymap.set :n :<leader>gs "<cmd>Pick git_hunks<CR>"
                   {:desc "Search git hunks"})
   (vim.keymap.set :n :<leader>q vim.diagnostic.setloclist
-                  {:desc "Open diagnostic quickfix list"}))
-
-(vim.keymap.set :n :<Esc> :<cmd>nohlsearch<CR> {:desc "Clear search highlight"})
+                  {:desc "Open diagnostic quickfix list"})
+  (vim.keymap.set :n :<Esc> :<cmd>nohlsearch<CR>
+                  {:desc "Clear search highlight"}))
 
 {: setup}

@@ -20,7 +20,7 @@ local function setup()
   vim.keymap.set("n", "<leader>sg", "<cmd>Pick grep_live<CR>", {desc = "Search by grep"})
   vim.keymap.set("n", "<leader><leader>", "<cmd>Pick buffers<CR>", {desc = "Find buffer"})
   vim.keymap.set("n", "<leader>gs", "<cmd>Pick git_hunks<CR>", {desc = "Search git hunks"})
-  return vim.keymap.set("n", "<leader>q", vim.diagnostic.setloclist, {desc = "Open diagnostic quickfix list"})
+  vim.keymap.set("n", "<leader>q", vim.diagnostic.setloclist, {desc = "Open diagnostic quickfix list"})
+  return vim.keymap.set("n", "<Esc>", "<cmd>nohlsearch<CR>", {desc = "Clear search highlight"})
 end
-vim.keymap.set("n", "<Esc>", "<cmd>nohlsearch<CR>", {desc = "Clear search highlight"})
 return {setup = setup}
